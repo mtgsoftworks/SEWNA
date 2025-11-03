@@ -1,9 +1,5 @@
 # SEWNA - Custom Fashion Platform
 
-<div align="center">
-<img width="1200" height="475" alt="SEWNA Banner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
-
 SEWNA is a platform that connects people with independent fashion designers to create unique, custom outfits. Upload inspiration images and get AI-powered design briefs.
 
 ## Features
