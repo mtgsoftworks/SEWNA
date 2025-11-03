@@ -56,15 +56,27 @@ const App: React.FC = () => {
     }
   };
 
+  const getCurrentPage = () => {
+    switch (view) {
+      case 'customRequest': return 'request' as const;
+      case 'designerPortfolio': return 'portfolio' as const;
+      case 'designerDiscovery': return 'discover' as const;
+      case 'welcome':
+      default: return 'home' as const;
+    }
+  };
+
   return (
-    <div className="bg-white min-h-screen text-black antialiased">
-      <Header onLogoClick={() => setView('welcome')} />
-      <main className="pt-16" id="main-content">
+    <div className="bg-background-light dark:bg-background-dark min-h-screen text-text-light dark:text-text-dark antialiased">
+      <Header onLogoClick={() => setView('welcome')} currentPage={getCurrentPage()} />
+      <main className="pt-20" id="main-content">
         {renderContent()}
       </main>
-      <footer className="py-8 text-center text-sm text-gray-500 border-t border-gray-200">
-        <p>&copy; {new Date().getFullYear()} SEWNA. All rights reserved.</p>
-      </footer>
+      {view !== 'welcome' && (
+        <footer className="py-8 text-center text-sm text-gray-500 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-900">
+          <p>&copy; {new Date().getFullYear()} SEWNA. All rights reserved.</p>
+        </footer>
+      )}
     </div>
   );
 };

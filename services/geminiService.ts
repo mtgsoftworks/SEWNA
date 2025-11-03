@@ -1,15 +1,33 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { DesignBrief } from '../types';
 
-// Get API key from environment variables or use provided key
-const API_KEY = "AIzaSyBGRbq4myBoeEK6kcui_E64fq09DmzecKA";
+let cachedClient: GoogleGenerativeAI | null = null;
+let cachedApiKey: string | null = null;
+
+const resolveApiKey = (): string => {
+  const rawKey = import.meta.env.VITE_GEMINI_API_KEY ?? '';
+  return rawKey.trim();
+};
 
 // Check if API key is available
 const isApiKeyAvailable = () => {
-  return API_KEY && API_KEY !== "YOUR_API_KEY";
+  return resolveApiKey().length > 0;
 };
 
-const ai = new GoogleGenerativeAI(API_KEY);
+const getGeminiClient = () => {
+  const apiKey = resolveApiKey();
+
+  if (!apiKey) {
+    throw new Error("API key is not configured. Please add your Gemini API key to continue.");
+  }
+
+  if (!cachedClient || cachedApiKey !== apiKey) {
+    cachedClient = new GoogleGenerativeAI(apiKey);
+    cachedApiKey = apiKey;
+  }
+
+  return cachedClient;
+};
 
 const fileToGenerativePart = async (file: File) => {
   // Validate file size (max 10MB)
@@ -79,7 +97,7 @@ export const generateDesignBriefFromImage = async (
       text: `Analyze the provided image of an outfit and the user's notes to create a detailed design brief. Be creative but ground your analysis in the visual evidence. User notes: "${userNotes || 'No additional notes provided.'}"`
     };
 
-    const response = await ai.getGenerativeModel({
+    const response = await getGeminiClient().getGenerativeModel({
       model: 'gemini-2.5-flash',
     }).generateContent({
       contents: [

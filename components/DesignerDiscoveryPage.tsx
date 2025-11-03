@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { BriefcaseIcon, LightBulbIcon, SparklesIcon } from './icons/FeatureIcons';
+import StarRating from './StarRating';
 
 interface Designer {
   id: string;
@@ -8,8 +8,9 @@ interface Designer {
   bio: string;
   rating: number;
   projectsCompleted: number;
-  avatar: string;
+  avatar?: string;
   tags: string[];
+  image?: string;
 }
 
 interface DesignerDiscoveryPageProps {
@@ -18,192 +19,187 @@ interface DesignerDiscoveryPageProps {
 
 const DesignerDiscoveryPage: React.FC<DesignerDiscoveryPageProps> = ({ onBack }) => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedSpecialty, setSelectedSpecialty] = useState('all');
-  const [sortBy, setSortBy] = useState<'rating' | 'projects' | 'name'>('rating');
+  const [selectedSpecialty, setSelectedSpecialty] = useState('All Specialties');
+  const [selectedStyle, setSelectedStyle] = useState('Any Style');
+  const [selectedRating, setSelectedRating] = useState('Any Rating');
+  const [location, setLocation] = useState('');
   const [selectedDesigner, setSelectedDesigner] = useState<Designer | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   // Mock data for designers
   const designers: Designer[] = [
     {
       id: '1',
-      name: 'Elena Rodriguez',
-      specialty: 'Bridal Wear',
-      bio: 'Specializing in elegant bridal gowns with modern touches. Every dress tells a unique love story.',
-      rating: 4.9,
-      projectsCompleted: 47,
-      avatar: 'ER',
-      tags: ['Bridal', 'Formal', 'Elegant']
+      name: 'Jane Doe',
+      specialty: 'Knitwear',
+      bio: 'Crafting timeless knitwear with a focus on sustainable materials and modern silhouettes.',
+      rating: 4.8,
+      projectsCompleted: 12,
+      image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuD_-x5AaVGIYBpB1_DSI9gjbCS8k0JGTW3cg8xXai02fc1mCI3ixqrS0d1mqefXvw-fkIcj9Q6KzfOiABQFik0BO5TX4eVQ3MV4opnDb21LausCL_7lAuYxQDMepu4XWUE3k-V1x__8XlWL2MtUSPrbtaZS5fyf7GLTsKZiawN3EzGn5frQjKXunBNwla9cTfKxZERlo7cx_Jw-6BfM6VIznR7tJCOKfJbuye5iBlIU8cBg5hvpfJebGDt5JsViSrZrkYriygyc910',
+      tags: ['Minimalist', 'Sustainable']
     },
     {
       id: '2',
-      name: 'Marcus Chen',
+      name: 'John Smith',
       specialty: 'Streetwear',
-      bio: 'Urban fashion with a sustainable twist. Creating bold statements that respect our planet.',
-      rating: 4.7,
-      projectsCompleted: 62,
-      avatar: 'MC',
-      tags: ['Streetwear', 'Sustainable', 'Urban']
+      bio: 'Bold, graphic-driven streetwear that pushes the boundaries of urban fashion culture.',
+      rating: 5.0,
+      projectsCompleted: 25,
+      image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBsLVib_NZg63LoBpCbEHwrKCnRKF-ix--BRUznA-ymzDuqUo785_-E0oPW8Btys0EfEVJxP0Rg9Z0UaC0Mnz7rDDcSwAjuu6jWyrjueItXKT5hnAXMGunofisdKiKT_CIgVTE6PACwt3VA0EF7OxJoHVma7Q96lCovig3hs2alAhsBL_tlZrCmsLBCiguCev_gJbVnRtnMbDveSynkoN6N4dfo_-qG7oUE7jjuHsBRLtOuJVnwNgu8mYPrn1XDwn6_FL46KBcKz3o',
+      tags: ['Urban', 'Graphic']
     },
     {
       id: '3',
-      name: 'Sophia Laurent',
-      specialty: 'Evening Wear',
-      bio: 'Red carpet glamour meets everyday comfort. Luxury fashion for the modern woman.',
-      rating: 4.8,
-      projectsCompleted: 35,
-      avatar: 'SL',
-      tags: ['Evening', 'Luxury', 'Modern']
+      name: 'Maria Garcia',
+      specialty: 'Bridal',
+      bio: 'Elegant and romantic bridal gowns designed to make every bride feel exceptional.',
+      rating: 5.0,
+      projectsCompleted: 18,
+      image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBHLSmoXcvgHfDBV3A72q9VkBx33CswlX5x9aNmucP8J2-k0A1qJSYKn-dF1zUWCqUCyXkwblNdFEr3feSXZq85592QDuGaH-oiJltiqvUMaCOKefjtMU2xwUg8UIXeL4sBeCoryOyBZfrd9PYIvsF1fhQP0NdLyN1OaK3Kt3ShIzZ8-R-Gq4A1vstLzkJifsqcLe5xMXRJ3yihvnqs_qMh9zUjNTw4QzRr59pUnefkN-9RX6KFzzlc7WqxyxufWSZnYvJJG_tqYrw',
+      tags: ['Elegant', 'Romantic']
     },
     {
       id: '4',
-      name: 'James Wilson',
-      specialty: 'Casual Wear',
-      bio: 'Comfortable, practical, and stylish. Everyday fashion that feels like you.',
-      rating: 4.6,
-      projectsCompleted: 58,
-      avatar: 'JW',
-      tags: ['Casual', 'Comfortable', 'Practical']
-    },
-    {
-      id: '5',
-      name: 'Aisha Patel',
-      specialty: 'Traditional Fusion',
-      bio: 'Blending traditional craftsmanship with contemporary design. Cultural heritage in modern form.',
-      rating: 4.9,
-      projectsCompleted: 29,
-      avatar: 'AP',
-      tags: ['Traditional', 'Fusion', 'Cultural']
-    },
-    {
-      id: '6',
-      name: 'David Kim',
-      specialty: 'Business Attire',
-      bio: 'Professional wear that makes a statement. Power dressing for the modern workplace.',
+      name: 'Chen Wei',
+      specialty: 'Haute Couture',
+      bio: 'Exquisite, one-of-a-kind creations that blend traditional craftsmanship with avant-garde design.',
       rating: 4.5,
-      projectsCompleted: 41,
-      avatar: 'DK',
-      tags: ['Business', 'Professional', 'Modern']
+      projectsCompleted: 31,
+      image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBgOMn8ahjbyzNkZiGWWXBnU-2WvmInVaJKZ9_1qts_LtAC4JMNa6s9v-ZTWUQUtOHI06573IbN-xjF3Iu1K15hhfOEgd6uXjGzuQTajEhG6ZjW9AfINCDH_D3zhTNj6LumGCRJcgsIhlPsJM64yKsxWjSExnHd9Ni5c2KOuVRfauqlJUNk49Pd7H3_CRWMFPXrOts3y76EjvwILSEqovH1kOLOCfVOzAZKfPLu7Hu3FptDiFKAtE_JwxLRrY-gUXBlZqY3Ix8I-YI',
+      tags: ['Avant-Garde', 'Luxury']
     }
   ];
 
-  const specialties = useMemo(() => {
-    const uniqueSpecialties = [...new Set(designers.map(d => d.specialty))];
-    return ['all', ...uniqueSpecialties];
-  }, []);
+  const specialties = ['All Specialties', 'Knitwear', 'Haute Couture', 'Streetwear', 'Bridal'];
+  const styles = ['Any Style', 'Minimalist', 'Bohemian', 'Vintage', 'Sustainable'];
+  const ratings = ['Any Rating', '4 Stars & Up', '3 Stars & Up', '2 Stars & Up'];
 
-  const filteredAndSortedDesigners = useMemo(() => {
-    let filtered = designers.filter(designer => {
+  const filteredDesigners = useMemo(() => {
+    return designers.filter(designer => {
       const matchesSearch = designer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
                           designer.specialty.toLowerCase().includes(searchTerm.toLowerCase()) ||
                           designer.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()));
-      
-      const matchesSpecialty = selectedSpecialty === 'all' || designer.specialty === selectedSpecialty;
-      
-      return matchesSearch && matchesSpecialty;
-    });
 
-    // Sort designers
-    return [...filtered].sort((a, b) => {
-      if (sortBy === 'rating') return b.rating - a.rating;
-      if (sortBy === 'projects') return b.projectsCompleted - a.projectsCompleted;
-      if (sortBy === 'name') return a.name.localeCompare(b.name);
-      return 0;
-    });
-  }, [designers, searchTerm, selectedSpecialty, sortBy]);
+      const matchesSpecialty = selectedSpecialty === 'All Specialties' || designer.specialty === selectedSpecialty;
+      const matchesStyle = selectedStyle === 'Any Style' || designer.tags.includes(selectedStyle);
 
-  const StarRating = ({ rating }: { rating: number }) => {
-    return (
-      <div className="flex items-center">
-        {[1, 2, 3, 4, 5].map((star) => (
-          <svg
-            key={star}
-            className={`w-4 h-4 ${star <= rating ? 'text-yellow-400' : 'text-gray-300'}`}
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 20 20"
-            fill="currentColor"
-          >
-            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.538 1.118l2.8-2.034a1 1 0 011.09 0l2.8 2.034c.784.57 1.838-.197 1.538-1.118l-1.07-3.292a1 1 0 00-.364-1.118L18.46 6.91c.783-.57.384-1.81-.588-1.81h-3.462a1 1 0 01-.95-.69L10.95 2.927z" />
-          </svg>
-        ))}
-        <span className="ml-1 text-sm text-gray-600">({rating})</span>
-      </div>
-    );
-  };
+      let matchesRating = true;
+      if (selectedRating === '4 Stars & Up') matchesRating = designer.rating >= 4;
+      else if (selectedRating === '3 Stars & Up') matchesRating = designer.rating >= 3;
+      else if (selectedRating === '2 Stars & Up') matchesRating = designer.rating >= 2;
+
+      return matchesSearch && matchesSpecialty && matchesStyle && matchesRating;
+    });
+  }, [designers, searchTerm, selectedSpecialty, selectedStyle, selectedRating]);
 
   const DesignerCard = ({ designer }: { designer: Designer }) => (
-    <div 
-      className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm hover:shadow-lg transition-all duration-300 hover:-translate-y-1 cursor-pointer"
+    <div
+      className="bg-white dark:bg-[#0c1d18] rounded-xl overflow-hidden border border-[#e6f4f0] dark:border-[#1a2e29] hover:shadow-lg hover:-translate-y-1 transition-all duration-300"
       onClick={() => setSelectedDesigner(designer)}
     >
-      <div className="flex items-start space-x-4">
-        <div className="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 font-bold text-xl">
-          {designer.avatar}
-        </div>
-        <div className="flex-1">
-          <h3 className="text-lg font-semibold">{designer.name}</h3>
-          <p className="text-sm text-gray-500 mb-2">{designer.specialty}</p>
-          <StarRating rating={designer.rating} />
-          <p className="text-xs text-gray-500 mt-1">{designer.projectsCompleted} projects completed</p>
-        </div>
+      <div
+        className="bg-center bg-no-repeat aspect-[4/3] bg-cover"
+        style={{ backgroundImage: designer.image ? `url(${designer.image})` : undefined }}
+      >
+        {!designer.image && (
+          <div className="w-full h-full flex items-center justify-center bg-gray-200">
+            <span className="text-gray-500 text-2xl font-bold">
+              {designer.name.split(' ').map(n => n[0]).join('')}
+            </span>
+          </div>
+        )}
       </div>
-      <p className="text-sm text-gray-600 mt-4 line-clamp-2">{designer.bio}</p>
-      <div className="flex flex-wrap gap-2 mt-4">
-        {designer.tags.map(tag => (
-          <span key={tag} className="bg-gray-100 px-2 py-1 rounded-full text-xs">
-            {tag}
-          </span>
-        ))}
+      <div className="p-6 flex flex-col gap-4">
+        <div>
+          <h3 className="text-xl font-bold text-[#0c1d18] dark:text-white">{designer.name}</h3>
+          <p className="text-primary dark:text-[#66d1b2] font-medium">{designer.specialty}</p>
+        </div>
+        <StarRating rating={designer.rating} reviewCount={designer.projectsCompleted} />
+        <p className="text-[#45a185] dark:text-[#94c2b3] text-sm leading-relaxed">{designer.bio}</p>
+        <div className="flex flex-wrap gap-2">
+          {designer.tags.map(tag => (
+            <span key={tag} className="px-3 py-1 text-xs font-semibold rounded-full bg-primary/20 dark:bg-primary/30 text-[#0c1d18] dark:text-white">
+              {tag}
+            </span>
+          ))}
+        </div>
+        <div className="flex gap-3 pt-2">
+          <button
+            className="flex-1 cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-primary text-white text-sm font-bold leading-normal tracking-[0.015em] hover:opacity-90 transition-opacity"
+            onClick={(e) => {
+              e.stopPropagation();
+              // Handle view profile
+            }}
+          >
+            View Profile
+          </button>
+          <button
+            className="flex-1 cursor-pointer items-center justify-center overflow-hidden rounded-lg h-10 px-4 bg-primary/20 dark:bg-primary/30 text-[#0c1d18] dark:text-white text-sm font-bold leading-normal tracking-[0.015em] hover:bg-primary/30 dark:hover:bg-primary/40 transition-colors"
+            onClick={(e) => {
+              e.stopPropagation();
+              // Handle contact
+            }}
+          >
+            Contact
+          </button>
+        </div>
       </div>
     </div>
   );
 
   const DesignerModal = ({ designer }: { designer: Designer }) => (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+      <div className="bg-white dark:bg-[#0c1d18] rounded-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
         <div className="p-6">
           <div className="flex justify-between items-start mb-6">
             <div className="flex items-center space-x-4">
-              <div className="w-20 h-20 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 font-bold text-2xl">
-                {designer.avatar}
-              </div>
+              {designer.image ? (
+                <div
+                  className="w-20 h-20 rounded-full bg-center bg-no-repeat bg-cover"
+                  style={{ backgroundImage: `url(${designer.image})` }}
+                />
+              ) : (
+                <div className="w-20 h-20 rounded-full bg-gray-200 flex items-center justify-center text-gray-600 font-bold text-2xl">
+                  {designer.name.split(' ').map(n => n[0]).join('')}
+                </div>
+              )}
               <div>
-                <h2 className="text-2xl font-bold">{designer.name}</h2>
-                <p className="text-gray-500">{designer.specialty}</p>
-                <StarRating rating={designer.rating} />
-                <p className="text-sm text-gray-500">{designer.projectsCompleted} projects completed</p>
+                <h2 className="text-2xl font-bold text-[#0c1d18] dark:text-white">{designer.name}</h2>
+                <p className="text-primary dark:text-[#66d1b2] font-medium">{designer.specialty}</p>
+                <StarRating rating={designer.rating} reviewCount={designer.projectsCompleted} />
+                <p className="text-sm text-gray-500 dark:text-gray-400">{designer.projectsCompleted} projects completed</p>
               </div>
             </div>
-            <button 
+            <button
               onClick={() => setSelectedDesigner(null)}
               className="text-gray-400 hover:text-gray-600 transition-colors"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
+              <span className="material-symbols-outlined">close</span>
             </button>
           </div>
-          
+
           <div className="mb-6">
-            <h3 className="text-lg font-semibold mb-2">About</h3>
-            <p className="text-gray-600">{designer.bio}</p>
+            <h3 className="text-lg font-semibold mb-2 text-[#0c1d18] dark:text-white">About</h3>
+            <p className="text-gray-600 dark:text-gray-400">{designer.bio}</p>
           </div>
-          
+
           <div className="mb-6">
-            <h3 className="text-lg font-semibold mb-2">Specialties</h3>
+            <h3 className="text-lg font-semibold mb-2 text-[#0c1d18] dark:text-white">Specialties</h3>
             <div className="flex flex-wrap gap-2">
               {designer.tags.map(tag => (
-                <span key={tag} className="bg-gray-100 px-3 py-1 rounded-full text-sm">
+                <span key={tag} className="bg-primary/20 dark:bg-primary/30 px-3 py-1 rounded-full text-sm text-[#0c1d18] dark:text-white">
                   {tag}
                 </span>
               ))}
             </div>
           </div>
-          
+
           <div className="flex space-x-4">
-            <button className="flex-1 bg-[#00b67f] text-white font-semibold py-3 px-6 rounded-full transition-all duration-300 hover:scale-105">
+            <button className="flex-1 bg-primary text-white font-semibold py-3 px-6 rounded-full transition-all duration-300 hover:scale-105">
               Contact Designer
             </button>
-            <button className="flex-1 bg-gray-200 text-black font-semibold py-3 px-6 rounded-full transition-all duration-300 hover:bg-gray-300">
+            <button className="flex-1 bg-gray-200 dark:bg-gray-700 text-[#0c1d18] dark:text-white font-semibold py-3 px-6 rounded-full transition-all duration-300 hover:bg-gray-300 dark:hover:bg-gray-600">
               View Portfolio
             </button>
           </div>
@@ -212,86 +208,182 @@ const DesignerDiscoveryPage: React.FC<DesignerDiscoveryPageProps> = ({ onBack })
     </div>
   );
 
+  const LoadingSpinner = () => (
+    <div className="flex justify-center items-center py-12">
+      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+    </div>
+  );
+
+  const EmptyState = () => (
+    <div className="text-center py-12">
+      <span className="material-symbols-outlined text-6xl text-gray-400">search_off</span>
+      <p className="text-gray-500 mt-4">No designers found matching your criteria</p>
+    </div>
+  );
+
+  const ErrorMessage = ({ message }: { message: string }) => (
+    <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+      {message}
+    </div>
+  );
+
+  const SkeletonCard = () => (
+    <div className="bg-white dark:bg-[#0c1d18] rounded-xl overflow-hidden border border-[#e6f4f0] dark:border-[#1a2e29] animate-pulse">
+      <div className="bg-gray-200 dark:bg-gray-700 aspect-[4/3]"></div>
+      <div className="p-6 flex flex-col gap-4">
+        <div className="space-y-2">
+          <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-3/4"></div>
+          <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/2"></div>
+        </div>
+        <div className="space-y-2">
+          <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-full"></div>
+          <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-5/6"></div>
+        </div>
+        <div className="flex gap-2">
+          <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded-full w-16"></div>
+          <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded-full w-16"></div>
+        </div>
+        <div className="flex gap-3 pt-2">
+          <div className="h-10 bg-gray-200 dark:bg-gray-700 rounded flex-1"></div>
+          <div className="h-10 bg-gray-200 dark:bg-gray-700 rounded flex-1"></div>
+        </div>
+      </div>
+    </div>
+  );
+
   return (
-    <div className="container mx-auto px-6 py-12 max-w-6xl">
-      <button onClick={onBack} className="text-[#00b67f] font-semibold mb-8">&larr; Back to Home</button>
-      
-      <div className="text-center mb-10">
-        <h1 className="text-3xl md:text-4xl font-bold mb-4">Discover Designers</h1>
-        <p className="text-lg text-gray-600 max-w-2xl mx-auto">
-          Find the perfect designer for your project. Browse through our curated selection of talented fashion professionals.
-        </p>
-      </div>
+    <div className="flex min-h-screen">
+      {/* Main Content */}
+      <main className="flex-1 p-8 overflow-y-auto">
+        <div className="max-w-7xl mx-auto">
+          {/* Search and Results Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+            {/* Filters Panel */}
+            <aside className="lg:col-span-1">
+              <div className="bg-white dark:bg-[#0c1d18] rounded-xl p-6 space-y-6 border border-[#e6f4f0] dark:border-[#1a2e29]">
+                {error && <ErrorMessage message={error} />}
+                {/* SearchBar */}
+                <div className="w-full">
+                  <label className="flex flex-col min-w-40 h-12 w-full">
+                    <div className="flex w-full flex-1 items-stretch rounded-lg h-full">
+                      <div className="text-[#45a185] flex bg-primary/20 dark:bg-primary/30 items-center justify-center pl-4 rounded-l-lg">
+                        <span className="material-symbols-outlined">search</span>
+                      </div>
+                      <input
+                        className="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-r-lg text-[#0c1d18] dark:text-white focus:outline-0 focus:ring-0 border-none bg-primary/20 dark:bg-primary/30 h-full placeholder:text-[#45a185] dark:placeholder:text-[#94c2b3] pl-2 text-base font-normal leading-normal"
+                        placeholder="Search designers..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                      />
+                    </div>
+                  </label>
+                </div>
 
-      {/* Filters and Search */}
-      <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm mb-8">
-        <div className="grid md:grid-cols-3 gap-4 mb-6">
-          <div>
-            <label htmlFor="search" className="block text-sm font-medium text-gray-700 mb-1">Search</label>
-            <input
-              type="text"
-              id="search"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Search by name, specialty, or style..."
-              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00b67f] focus:border-transparent"
-            />
-          </div>
-          
-          <div>
-            <label htmlFor="specialty" className="block text-sm font-medium text-gray-700 mb-1">Specialty</label>
-            <select
-              id="specialty"
-              value={selectedSpecialty}
-              onChange={(e) => setSelectedSpecialty(e.target.value)}
-              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00b67f] focus:border-transparent"
-            >
-              {specialties.map(specialty => (
-                <option key={specialty} value={specialty}>
-                  {specialty === 'all' ? 'All Specialties' : specialty}
-                </option>
-              ))}
-            </select>
-          </div>
-          
-          <div>
-            <label htmlFor="sort" className="block text-sm font-medium text-gray-700 mb-1">Sort By</label>
-            <select
-              id="sort"
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value as 'rating' | 'projects' | 'name')}
-              className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00b67f] focus:border-transparent"
-            >
-              <option value="rating">Highest Rated</option>
-              <option value="projects">Most Projects</option>
-              <option value="name">Name (A-Z)</option>
-            </select>
-          </div>
-        </div>
-        
-        <div className="text-sm text-gray-500">
-          Showing {filteredAndSortedDesigners.length} of {designers.length} designers
-        </div>
-      </div>
+                {/* SectionHeader */}
+                <h3 className="text-[#0c1d18] dark:text-white text-lg font-bold leading-tight tracking-[-0.015em] pt-2">Filters</h3>
 
-      {/* Designer Grid */}
-      {filteredAndSortedDesigners.length > 0 ? (
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredAndSortedDesigners.map(designer => (
-            <DesignerCard key={designer.id} designer={designer} />
-          ))}
-        </div>
-      ) : (
-        <div className="text-center py-12">
-          <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
+                {/* Filters */}
+                <div className="space-y-4">
+                  <label className="flex flex-col w-full">
+                    <p className="text-[#0c1d18] dark:text-white text-sm font-medium leading-normal pb-2">Specialty</p>
+                    <select
+                      className="form-select flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-[#0c1d18] dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-[#cdeae1] dark:border-[#2a4a40] bg-[#f8fcfb] dark:bg-[#1a2e29] h-12 px-3 text-base font-normal leading-normal"
+                      value={selectedSpecialty}
+                      onChange={(e) => setSelectedSpecialty(e.target.value)}
+                    >
+                      {specialties.map(specialty => (
+                        <option key={specialty} value={specialty}>{specialty}</option>
+                      ))}
+                    </select>
+                  </label>
+
+                  <label className="flex flex-col w-full">
+                    <p className="text-[#0c1d18] dark:text-white text-sm font-medium leading-normal pb-2">Style Tags</p>
+                    <select
+                      className="form-select flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-[#0c1d18] dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-[#cdeae1] dark:border-[#2a4a40] bg-[#f8fcfb] dark:bg-[#1a2e29] h-12 px-3 text-base font-normal leading-normal"
+                      value={selectedStyle}
+                      onChange={(e) => setSelectedStyle(e.target.value)}
+                    >
+                      {styles.map(style => (
+                        <option key={style} value={style}>{style}</option>
+                      ))}
+                    </select>
+                  </label>
+
+                  <label className="flex flex-col w-full">
+                    <p className="text-[#0c1d18] dark:text-white text-sm font-medium leading-normal pb-2">Rating</p>
+                    <select
+                      className="form-select flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-[#0c1d18] dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-[#cdeae1] dark:border-[#2a4a40] bg-[#f8fcfb] dark:bg-[#1a2e29] h-12 px-3 text-base font-normal leading-normal"
+                      value={selectedRating}
+                      onChange={(e) => setSelectedRating(e.target.value)}
+                    >
+                      {ratings.map(rating => (
+                        <option key={rating} value={rating}>{rating}</option>
+                      ))}
+                    </select>
+                  </label>
+
+                  <label className="flex flex-col w-full">
+                    <p className="text-[#0c1d18] dark:text-white text-sm font-medium leading-normal pb-2">Location</p>
+                    <input
+                      className="form-input flex w-full min-w-0 flex-1 resize-none overflow-hidden rounded-lg text-[#0c1d18] dark:text-white focus:outline-0 focus:ring-2 focus:ring-primary/50 border border-[#cdeae1] dark:border-[#2a4a40] bg-[#f8fcfb] dark:bg-[#1a2e29] h-12 placeholder:text-[#45a185] dark:placeholder:text-[#94c2b3] px-3 text-base font-normal leading-normal"
+                      placeholder="e.g., Paris, France"
+                      value={location}
+                      onChange={(e) => setLocation(e.target.value)}
+                    />
+                  </label>
+                </div>
+
+                <div className="flex flex-col gap-3 pt-4">
+                  <button className="w-full flex cursor-pointer items-center justify-center overflow-hidden rounded-lg h-11 px-4 bg-primary text-white text-sm font-bold leading-normal tracking-[0.015em] hover:opacity-90 transition-opacity">
+                    Apply Filters
+                  </button>
+                  <button className="w-full text-center text-primary dark:text-[#66d1b2] text-sm font-medium hover:underline">
+                    Clear All
+                  </button>
+                </div>
+              </div>
+            </aside>
+
+            {/* Designer Cards Grid */}
+            <div className="lg:col-span-3">
+              {isLoading ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <SkeletonCard />
+                  <SkeletonCard />
+                  <SkeletonCard />
+                  <SkeletonCard />
+                </div>
+              ) : filteredDesigners.length === 0 ? (
+                <EmptyState />
+              ) : (
+                <>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {filteredDesigners.map(designer => (
+                      <DesignerCard designer={designer} />
+                    ))}
+                  </div>
+
+                  {/* Pagination */}
+                  <nav className="flex items-center justify-center gap-4 mt-12 text-[#0c1d18] dark:text-white">
+                    <button className="p-2 rounded-lg hover:bg-primary/20 dark:hover:bg-primary/30 transition-colors disabled:opacity-50" disabled>
+                      <span className="material-symbols-outlined">chevron_left</span>
+                    </button>
+                    <a className="h-10 w-10 flex items-center justify-center text-sm font-bold rounded-lg bg-primary text-white" href="#">1</a>
+                    <a className="h-10 w-10 flex items-center justify-center text-sm font-medium rounded-lg hover:bg-primary/20 dark:hover:bg-primary/30 transition-colors" href="#">2</a>
+                    <a className="h-10 w-10 flex items-center justify-center text-sm font-medium rounded-lg hover:bg-primary/20 dark:hover:bg-primary/30 transition-colors" href="#">3</a>
+                    <span className="text-sm">...</span>
+                    <a className="h-10 w-10 flex items-center justify-center text-sm font-medium rounded-lg hover:bg-primary/20 dark:hover:bg-primary/30 transition-colors" href="#">10</a>
+                    <button className="p-2 rounded-lg hover:bg-primary/20 dark:hover:bg-primary/30 transition-colors">
+                      <span className="material-symbols-outlined">chevron_right</span>
+                    </button>
+                  </nav>
+                </>
+              )}
+            </div>
           </div>
-          <h3 className="text-xl font-semibold mb-2">No designers found</h3>
-          <p className="text-gray-600">Try adjusting your search or filters to find what you're looking for.</p>
         </div>
-      )}
+      </main>
 
       {/* Designer Modal */}
       {selectedDesigner && (
