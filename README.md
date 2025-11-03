@@ -12,12 +12,40 @@ SEWNA is a platform that connects people with independent fashion designers to c
 - **Designer Discovery**: Browse and connect with talented fashion designers who match your style
 - **Custom Requests**: Submit detailed design requests with your preferences and requirements
 - **Designer Portfolios**: Designers can showcase their work and connect with potential clients
+- **Advanced UI/UX**: Loading states, error handling, empty states, and skeleton loading
+- **Responsive Design**: Mobile-first approach with dark mode support
+- **Modern Styling**: Clean, professional interface with lime green (#00b67f) accent color
 
 ## Technology Stack
 
-- **Frontend**: React, TypeScript, Vite, Tailwind CSS
+- **Frontend**: React 19.2.0, TypeScript, Vite, Tailwind CSS
 - **AI**: Google Gemini 2.5 Flash for image analysis and design brief generation
 - **Styling**: Clean, modern design with lime green (#00b67f) accent color
+- **Icons**: Material Symbols for consistent iconography
+- **State Management**: React hooks with TypeScript type safety
+
+## UI/UX Features
+
+### Loading States
+- **Loading Spinner**: Animated spinner for async operations
+- **Skeleton Loading**: Placeholder cards with pulse animation during data fetching
+- **Progress Indicators**: Visual feedback for ongoing operations
+
+### Error Handling
+- **Error Messages**: Red-bordered error notifications with clear messaging
+- **Form Validation**: Input validation with user-friendly error display
+- **Error Boundaries**: Graceful error handling for component failures
+
+### Empty States
+- **No Results**: Friendly "No designers found" messages with search icon
+- **Empty Forms**: Clear guidance for empty form states
+- **Placeholder Content**: Helpful placeholder text and icons
+
+### User Experience
+- **Responsive Design**: Mobile, tablet, and desktop optimized layouts
+- **Dark Mode**: Complete dark theme support with proper color contrast
+- **Micro-interactions**: Hover effects, transitions, and smooth animations
+- **Accessibility**: ARIA labels and keyboard navigation support
 
 ## Getting Started
 
@@ -41,7 +69,7 @@ SEWNA is a platform that connects people with independent fashion designers to c
 
 3. Set up environment variables:
    Create a `.env.local` file in the root directory and add:
-   ```
+   ```env
    VITE_GEMINI_API_KEY=your_gemini_api_key_here
    ```
 
@@ -50,7 +78,78 @@ SEWNA is a platform that connects people with independent fashion designers to c
    npm run dev
    ```
 
-5. Open your browser and navigate to `http://localhost:3000`
+5. Open your browser and navigate to `http://localhost:3001`
+
+## Project Structure
+
+```
+sewna/
+├── components/          # React components
+│   ├── WelcomePage.tsx
+│   ├── CustomRequestPage.tsx
+│   ├── DesignerPortfolioUpload.tsx
+│   ├── DesignerDiscoveryPage.tsx
+│   ├── StarRating.tsx
+│   ├── ProgressBar.tsx
+│   ├── Breadcrumbs.tsx
+│   └── Sidebar.tsx
+├── services/           # API services
+│   └── geminiService.ts
+├── types.ts           # TypeScript type definitions
+├── App.tsx            # Main app component
+├── index.html         # HTML template
+└── vite.config.ts     # Vite configuration
+```
+
+## Component Architecture
+
+### Core Components
+- **WelcomePage**: Landing page with hero section and feature highlights
+- **CustomRequestPage**: 4-step custom request process with progress tracking
+- **DesignerDiscoveryPage**: Designer browsing with advanced filtering and search
+- **DesignerPortfolioUpload**: Portfolio creation with style tags and image upload
+
+### Shared Components
+- **StarRating**: Reusable star rating component with review count
+- **ProgressBar**: Visual progress indicator for multi-step processes
+- **Breadcrumbs**: Navigation breadcrumb component
+- **Sidebar**: Navigation sidebar with current page highlighting
+
+## Styling System
+
+### Color Palette
+- **Primary**: #00b67f (Lime Green)
+- **Dark Background**: #0c1d18
+- **Light Background**: #ffffff
+- **Text Primary**: #0c1d18
+- **Text Secondary**: #45a185
+- **Border Light**: #e6f4f0
+- **Border Dark**: #1a2e29
+
+### Design Tokens
+- **Spacing**: 4px base unit with 8px, 16px, 24px, 32px scales
+- **Border Radius**: 8px (small), 12px (medium), 16px (large)
+- **Typography**: Inter font with responsive sizing
+- **Shadows**: Subtle shadow system for depth and hierarchy
+
+## Development Workflow
+
+### Local Development
+1. Start development server: `npm run dev`
+2. Make changes to components
+3. Hot reload automatically updates the browser
+4. TypeScript provides type safety and autocompletion
+
+### Building for Production
+1. Build the project: `npm run build`
+2. Optimize assets and bundle size
+3. Generate static files in `dist/` directory
+
+### Code Quality
+- **TypeScript**: Strict type checking enabled
+- **ESLint**: Code linting with React rules
+- **Prettier**: Code formatting (optional)
+- **Git Hooks**: Pre-commit hooks for code quality
 
 ## Deployment
 
@@ -61,7 +160,7 @@ SEWNA is a platform that connects people with independent fashion designers to c
    npm i -g vercel
    ```
 
-2. Build the project:
+2. Build project:
    ```bash
    npm run build
    ```
@@ -81,7 +180,7 @@ SEWNA is a platform that connects people with independent fashion designers to c
    npm i -g netlify-cli
    ```
 
-2. Build the project:
+2. Build project:
    ```bash
    npm run build
    ```
@@ -96,29 +195,25 @@ SEWNA is a platform that connects people with independent fashion designers to c
 
 ## API Keys
 
-To use the AI features, you'll need a Google Gemini API key:
+To use AI features, you'll need a Google Gemini API key:
 
 1. Go to [Google AI Studio](https://aistudio.google.com/app/apikey)
 2. Create a new API key
 3. Add it to your environment variables as `VITE_GEMINI_API_KEY`
 
-## Project Structure
+## Browser Support
 
-```
-sewna/
-├── components/          # React components
-│   ├── WelcomePage.tsx
-│   ├── CustomRequestPage.tsx
-│   ├── DesignerPortfolioUpload.tsx
-│   ├── DesignerDiscoveryPage.tsx
-│   └── icons/           # Icon components
-├── services/           # API services
-│   └── geminiService.ts
-├── types.ts           # TypeScript type definitions
-├── App.tsx            # Main app component
-├── index.html         # HTML template
-└── vite.config.ts     # Vite configuration
-```
+- **Chrome/Edge**: Full support (recommended)
+- **Firefox**: Full support
+- **Safari**: Full support
+- **Mobile Browsers**: iOS Safari, Chrome Mobile, Firefox Mobile
+
+## Performance
+
+- **Bundle Size**: Optimized with code splitting
+- **Loading**: Lazy loading for images and components
+- **Caching**: Service worker support for offline functionality
+- **Images**: Optimized loading with WebP support
 
 ## Contributing
 
@@ -128,6 +223,13 @@ sewna/
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
+### Development Guidelines
+- Follow the existing code style and structure
+- Use TypeScript for type safety
+- Write meaningful commit messages
+- Test your changes thoroughly
+- Update documentation as needed
+
 ## License
 
 This project is licensed under the MIT License.
@@ -135,3 +237,7 @@ This project is licensed under the MIT License.
 ## Contact
 
 For questions or support, please contact [your-email@example.com](mailto:your-email@example.com).
+
+---
+
+**Built with ❤️ for the fashion community**
