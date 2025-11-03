@@ -1,0 +1,5 @@
+{
+  "name": "SEWNA - Custom Fashion Platform",
+  "description": "A platform that helps people connect with independent fashion designers to create unique, custom outfits. This app features a redesigned welcome page and a Gemini-powered 'Custom Request' feature where users can get a design brief from an inspiration image.",
+  "requestFramePermissions": []
+}
