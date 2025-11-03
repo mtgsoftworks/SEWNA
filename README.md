@@ -186,17 +186,6 @@ sewna/
    netlify deploy --prod --dir=dist
    ```
 
-4. Set environment variables in Netlify dashboard:
-   - Add `VITE_GEMINI_API_KEY` with your Gemini API key
-
-## API Keys
-
-To use AI features, you'll need a Google Gemini API key:
-
-1. Go to [Google AI Studio](https://aistudio.google.com/app/apikey)
-2. Create a new API key
-3. Add it to your environment variables as `VITE_GEMINI_API_KEY`
-
 ## Browser Support
 
 - **Chrome/Edge**: Full support (recommended)
@@ -229,11 +218,3 @@ To use AI features, you'll need a Google Gemini API key:
 ## License
 
 This project is licensed under the MIT License.
-
-## Contact
-
-For questions or support, please contact [your-email@example.com](mailto:your-email@example.com).
-
----
-
-**Built with ❤️ for the fashion community**
